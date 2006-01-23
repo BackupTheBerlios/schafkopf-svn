@@ -39,7 +39,7 @@ struct reply_play
 };
 
 /** 
- * Player whants to double?
+ * Player wants to double?
  */
 struct cmd_double
 {
@@ -50,15 +50,37 @@ struct reply_double
     unsigned char want_double;
 };
 
+/**
+ * Player wants to play?
+ */
+struct cmd_wantplay
+{
+};
+
+struct reply_wantplay
+{
+    unsigned char want_play;
+};
+
 /** 
  * Info of game currently played
  */
 struct cmd_gameinfo
 {
+    unsigned char player;
     unsigned char type;       // type of game if set, rules::type() is used
     unsigned char color;      // color of game if set, rules::color() is used
 };
 
+/**
+ * Info when player changes name. Sent to all players
+ */
+struct cmd_playerinfo
+{
+    int player;
+    char name[PLAYER_NAME_LENGTH];
+};
+    
 /**
  * Info if a player doubles
  */
@@ -78,10 +100,38 @@ struct cmd_cardplayed
 };
 
 /**
- * Info if a player connected
+ * Info if player wants to play
  */
-typedef cmd_connect cmd_playerconnected;
+struct cmd_playerwantsplay
+{
+    unsigned char player;
+};
 
+/** 
+ * Info when game is over.
+ */
+struct cmd_gamefinished
+{
+    unsigned char doublecnt;            // How often doubled?
+    unsigned char gametype;             // What kind of game?
+    unsigned char values_winner;        // How many points for winners?
+    unsigned char values_looser;        // How many points for loosers?
+    unsigned char winners[4];           // 1 if player wins, 0 if player losses
+    unsigned char worth;                // How much is game worth?
+};
+
+/**
+ * What game wants player to play?
+ */
+struct cmd_requestgame
+{
+};
+
+struct reply_requestgame
+{
+    unsigned char type;
+    unsigned char color;
+};
 
 /** 
  * Id's for all commands
@@ -92,10 +142,14 @@ typedef enum command_type
     CMD_GIVECARD = 2, 
     CMD_PLAY = 3, 
     CMD_DOUBLE = 4, 
-    CMD_GAMEINFO = 5, 
-    CMD_PLAYERDOUBLES = 6, 
-    CMD_CARDPLAYED = 7, 
-    CMD_PLAYERCONNECTED = 8 
+    CMD_WANTPLAY = 5,
+    CMD_GAMEINFO = 6, 
+    CMD_PLAYERDOUBLES = 7, 
+    CMD_PLAYERINFO = 8,
+    CMD_CARDPLAYED = 9, 
+    CMD_PLAYERWANTSPLAY = 10,
+    CMD_GAMEFINISHED = 11,
+    CMD_REQUESTGAME = 12,
 };
 
 /**
@@ -114,10 +168,14 @@ struct socket_cmd
         cmd_givecard givecard;
         cmd_play play;
         cmd_double doublecmd;
+        cmd_wantplay wantplay;
         cmd_gameinfo gameinfo;
         cmd_playerdoubles playerdoubles;
+        cmd_playerinfo playerinfo;
         cmd_cardplayed cardplayed;
-        cmd_playerconnected playerconnected;
+        cmd_playerwantsplay playerwantsplay;
+        cmd_gamefinished gamefinished;
+        cmd_requestgame requestgame;
     };
 };
 
@@ -129,10 +187,17 @@ void createCmdConnect(socket_cmd *cmd, const char *name);
 void createCmdGiveCard(socket_cmd *cmd, card *card);
 void createCmdPlay(socket_cmd *cmd);
 void createCmdDouble(socket_cmd *cmd);
-void createCmdGameInfo(socket_cmd *cmd, rules::gametype type, card::cardcolor color);
+void createCmdWantPlay(socket_cmd *cmd);
+void createCmdGameInfo(socket_cmd *cmd, int player, rules::gametype type, card::cardcolor color);
 void createCmdPlayerDoubles(socket_cmd *cmd, int player);
+void createCmdPlayerInfo(socket_cmd *cmd, int player, const char *name);
 void createCmdCardPlayed(socket_cmd *cmd, int player, card *card);
-void createCmdPlayerConnected(socket_cmd *cmd, const char *name);
+void createCmdPlayerWantsPlay(socket_cmd *cmd, int player);
+void createCmdRequestGame(socket_cmd *cmd);
+/*
+ * This function is an exception: it does only fill the socket_cmd header
+ */
+void createCmdGameFinished(socket_cmd *cmd);
 
 typedef bool (*socketwaiter)(int socket, int cnt, void *param);
 

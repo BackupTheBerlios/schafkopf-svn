@@ -20,7 +20,7 @@ class rules
         };
 
         // Supported games
-        typedef enum gametype { UNSET_GAME, RUFSPIEL, SOLO, WENZ, GEIER, RAMSCH , DACHS};
+        typedef enum gametype { UNSET_GAME=0, DACHS, RAMSCH, RUFSPIEL, GEIER, WENZ, SOLO };
         
         /**
          * Create rules for a game

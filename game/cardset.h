@@ -24,7 +24,7 @@ class cardset
         /**
          * Type of cardset: normal or shord cards
          */
-        typedef enum type { NORMAL=32, SHORT=20 };
+        typedef enum type { NORMAL=32, SHORT=24 };
 
         static const card cardset::all_cards[];
 

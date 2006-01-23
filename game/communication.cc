@@ -36,10 +36,17 @@ void createCommandDouble(socket_cmd *cmd)
     cmd->replycnt = sizeof(reply_double);
 }
 
-void createCmdGameInfo(socket_cmd *cmd, rules::gametype type, card::cardcolor color)
+void createCmdWantPlay(socket_cmd *cmd)
+{
+    cmd->type = CMD_WANTPLAY;
+    cmd->replycnt = sizeof(reply_double);
+}
+
+void createCmdGameInfo(socket_cmd *cmd, int player, rules::gametype type, card::cardcolor color)
 {
     cmd->type = CMD_GAMEINFO;
     cmd->replycnt = 0;
+    cmd->gameinfo.player = (unsigned char) player;
     cmd->gameinfo.type = (unsigned char) type;
     cmd->gameinfo.color = (unsigned char) color; 
 }
@@ -51,6 +58,14 @@ void createCmdPlayerDoubles(socket_cmd *cmd, int player)
     cmd->playerdoubles.player = (unsigned char) player;
 }
 
+void createCmdPlayerInfo(socket_cmd *cmd, int player, const char *name)
+{
+    cmd->type = CMD_PLAYERINFO;
+    cmd->replycnt = 0;
+    cmd->playerinfo.player = (unsigned char) player;
+    strncpy(cmd->playerinfo.name, name, PLAYER_NAME_LENGTH);
+}
+
 void createCmdCardPlayed(socket_cmd *cmd, int player, card *card)
 {
     cmd->type = CMD_CARDPLAYED;
@@ -60,11 +75,24 @@ void createCmdCardPlayed(socket_cmd *cmd, int player, card *card)
     cmd->cardplayed.color = (unsigned char) card->color();
 }
 
-void createCmdPlayerConnected(socket_cmd *cmd, const char *name)
+void createCmdPlayerWantsPlay(socket_cmd *cmd, int player)
 {
-    cmd->type = CMD_PLAYERCONNECTED;
+    cmd->type = CMD_PLAYERWANTSPLAY;
     cmd->replycnt = 0;
-    strcpy(cmd->playerconnected.name, name);
+    cmd->playerwantsplay.player = (unsigned char) player;
+}
+
+void createCmdGameFinished(socket_cmd *cmd)
+{
+    cmd->type = CMD_GAMEFINISHED;
+    cmd->replycnt = 0;
+    memset( cmd->gamefinished, 0, sizeof(cmd_gamefinished) );
+}
+
+void createCmdRequestGame(socket_cmd *cmd)
+{
+    cmd->type = CMD_REQUESTGAME;
+    cmd->replycnt = sizeof( reply_requestgame );
 }
 
 bool send_command(int socket, socket_cmd *cmd, unsigned char *reply, void *param)
